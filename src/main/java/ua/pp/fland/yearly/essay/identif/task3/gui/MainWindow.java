@@ -6,6 +6,9 @@ import ua.pp.fland.yearly.essay.identif.task3.gui.tools.BoxLayoutUtils;
 import ua.pp.fland.yearly.essay.identif.task3.gui.tools.ComponentUtils;
 import ua.pp.fland.yearly.essay.identif.task3.gui.tools.GUITools;
 import ua.pp.fland.yearly.essay.identif.task3.gui.tools.StandardBordersSizes;
+import ua.pp.fland.yearly.essay.identif.task3.model.ImplicitFiniteDifferenceMethod;
+import ua.pp.fland.yearly.essay.identif.task3.model.storage.CsvTimeTemperatureStorer;
+import ua.pp.fland.yearly.essay.identif.task3.model.storage.TimeTemperatureStorer;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,6 +17,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
@@ -175,6 +179,10 @@ public class MainWindow {
                 final double timeStep = Double.parseDouble(timeStepInput.getText());
                 final double endTime = Double.parseDouble(endTimeInput.getText());
 
+                ImplicitFiniteDifferenceMethod implicitFiniteDifferenceMethod =
+                        new ImplicitFiniteDifferenceMethod(1000, 0, 0.3, 10, 0.01);
+                Map<Double, Map<BigDecimal, Double>> calculatedTemp = implicitFiniteDifferenceMethod.calculate();
+
                 JFileChooser fileChooser = new JFileChooser() {
                     @Override
                     public void approveSelection() {
@@ -204,6 +212,14 @@ public class MainWindow {
                         path = path + ".csv";
                     }
                     log.debug("Storing data to: " + path);
+                    try {
+                        TimeTemperatureStorer timeTemperatureStorer = new CsvTimeTemperatureStorer(path);
+                        timeTemperatureStorer.store(calculatedTemp);
+                    } catch (IOException e) {
+                        log.error("Exception: " + e, e);
+                        JOptionPane.showMessageDialog(mainFrame, "Error while storing " + e,
+                                "IO Error", JOptionPane.ERROR_MESSAGE);
+                    }
                     log.debug("Data stored.");
                     JOptionPane.showMessageDialog(mainFrame, "Temperature calculated and stored to " + path, "Success",
                             JOptionPane.INFORMATION_MESSAGE);
