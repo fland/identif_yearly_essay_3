@@ -40,6 +40,8 @@ public class ImplicitFiniteDifferenceMethod {
 
     private final long n;
 
+    private final double DOUBLE_DELTA = 0.0001;
+
     public ImplicitFiniteDifferenceMethod(double startTemp, double environmentTemp, double wallThickness,
                                           double heatIrradiationCoeff, double xStep) {
         this.startTemp = startTemp;
@@ -77,16 +79,17 @@ public class ImplicitFiniteDifferenceMethod {
         Map<BigDecimal, Double> calculatedXTemp = new HashMap<BigDecimal, Double>();
 
         Map<Long, DirectFlowData> directFlowDataMap = new HashMap<Long, DirectFlowData>();
-        double a = -1;
-        double b = 1;
+        double a = 1;
+        double b = -1;
         double d = 0;
-        double c = 1;
+        double c = 0;
         directFlowDataMap.put(0L, new DirectFlowData(c, b, d, -a / b, -d / b));
 
         double currX = 0.0 + xStep;
         long i;
         for (i = 1; i < n; i++) {
             BigDecimal currXBigDecimal = new BigDecimal(currX).setScale(X_STEP_SCALE, RoundingMode.HALF_UP);
+            c = 1;
             a = 1;
             b = -(2 + s);
             d = s * prevTimeTemp.get(currXBigDecimal);
@@ -99,17 +102,23 @@ public class ImplicitFiniteDifferenceMethod {
             currX = currX + xStep;
         }
 //        i = i + 1;
-        b = 1;
-        d = 0;
-        directFlowDataMap.put(i, new DirectFlowData(c, b, d, 1, 1));
+        b = 1 + (heatIrradiationCoeff * xStep) / lambda;
+        a = 0;
+        c = -1;
+        d = environmentTemp * heatIrradiationCoeff * xStep / lambda;
+        double prevF = directFlowDataMap.get(i - 1).getF();
+        double prevG = directFlowDataMap.get(i - 1).getG();
+        double f = -a / (c * prevF + b);
+        double g = -(d + c * prevG) / (c * prevF + b);
+        directFlowDataMap.put(i, new DirectFlowData(c, b, d, f, g));
 
         currX = wallThickness;
         BigDecimal currXBigDecimal = new BigDecimal(currX).setScale(X_STEP_SCALE, RoundingMode.HALF_UP);
         c = directFlowDataMap.get(i).getC();
         b = directFlowDataMap.get(i).getB();
         d = directFlowDataMap.get(i).getD();
-        double g = directFlowDataMap.get(i - 1).getG();
-        double f = directFlowDataMap.get(i - 1).getF();
+        g = directFlowDataMap.get(i - 1).getG();
+        f = directFlowDataMap.get(i - 1).getF();
         double prevTemp = -(c * g + d) / (b + c * f);
         calculatedXTemp.put(currXBigDecimal, prevTemp);
         currX = currX - xStep;
@@ -130,7 +139,7 @@ public class ImplicitFiniteDifferenceMethod {
         Map<BigDecimal, Double> startXTemp = new HashMap<BigDecimal, Double>();
 
         double currXPos = 0;
-        for (; currXPos <= wallThickness; currXPos = currXPos + xStep) {
+        for (; currXPos <= wallThickness + DOUBLE_DELTA; currXPos = currXPos + xStep) {
             BigDecimal bigDecimalXPos = new BigDecimal(currXPos).setScale(X_STEP_SCALE, RoundingMode.HALF_UP);
             startXTemp.put(bigDecimalXPos, startTemp);
         }
