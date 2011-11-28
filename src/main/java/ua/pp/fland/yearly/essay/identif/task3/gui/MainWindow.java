@@ -19,8 +19,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -40,29 +38,25 @@ public class MainWindow {
     private final static String PROCESS_BTN_TEXT = "Process";
     private final static String EXIT_BTN_TEXT = "Exit";
 
-    private final static String X_START_VALUE_LABEL_TEXT = "x start value: ";
-    private final static String X_END_VALUE_LABEL_TEXT = "x end value: ";
-    private final static String X_COEFF_LABEL_TEXT = "x coeff: ";
-    private final static String FREE_TERM_LABEL_TEXT = "Free term: ";
-    private final static String FIRST_EQUATION_LABEL_TEXT = "First equation: ";
-    private final static String SECOND_EQUATION_LABEL_TEXT = "Second equation: ";
-    private final static String X_0_VALUE_LABEL_TEXT = "x0: ";
-    private final static String X_I_VALUE_LABEL_TEXT = "xi: ";
-    private final static String TIME_STEP_LABEL_TEXT = "Time step: ";
-    private final static String END_TIME_LABEL_TEXT = "End time: ";
+    private final static String START_TEMP_LABEL_TEXT = "Start temperature, C: ";
+    private final static String THERMAL_CONDUCTIVITY_LABEL_TEXT = "Thermal conductivity: ";
+    private final static String ENV_TEMP_LABEL_TEXT = "Environment temperature, C: ";
+    private final static String WALL_THICKNESS_LABEL_TEXT = "Wall thickness, m: ";
+    private final static String HEAT_IRRADIATION_COEFF_LABEL_TEXT = "Heat irradiation coeff: ";
+    private final static String THERMAL_DIFFUSIVITY_LABEL_TEXT = "Thermal diffusivity: ";
+    private final static String X_STEP_LABEL_TEXT = "X step, m: ";
+    private final static String TIME_STEP_LABEL_TEXT = "Time step, sec: ";
+    private final static String END_TIME_LABEL_TEXT = "End time, sec: ";
 
     private final JFrame mainFrame;
 
-    private final JTextField firstEqXStartValueInput;
-    private final JTextField firstEqXEndValueInput;
-    private final JTextField firstEqXCoeffInput;
-    private final JTextField firstEqFreeTermInput;
-    private final JTextField secondEqXStartValueInput;
-    private final JTextField secondEqXEndValueInput;
-    private final JTextField secondEqXCoeffInput;
-    private final JTextField secondEqFreeTermInput;
-    private final JTextField x0ValueInput;
-    private final JTextField xiValueInput;
+    private final JTextField startTempInput;
+    private final JTextField envTempInput;
+    private final JTextField wallThicknessInput;
+    private final JTextField heatIrradiationCoeefInput;
+    private final JTextField thermalConductivityInput;
+    private final JTextField thermalDiffusivityInput;
+    private final JTextField xStepInput;
     private final JTextField timeStepInput;
     private final JTextField endTimeInput;
 
@@ -73,51 +67,39 @@ public class MainWindow {
         mainFrame.setLocationRelativeTo(null);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        firstEqXEndValueInput = new JTextField("0.15");
-        GUITools.fixTextFieldSize(firstEqXEndValueInput);
-        firstEqXEndValueInput.setCaretPosition(0);
+        startTempInput = new JTextField("1000");
+        GUITools.fixTextFieldSize(startTempInput);
+        startTempInput.setCaretPosition(0);
 
-        firstEqXCoeffInput = new JTextField("0.066666667");
-        GUITools.fixTextFieldSize(firstEqXCoeffInput);
-        firstEqXCoeffInput.setCaretPosition(0);
+        envTempInput = new JTextField("0");
+        GUITools.fixTextFieldSize(envTempInput);
+        envTempInput.setCaretPosition(0);
 
-        firstEqFreeTermInput = new JTextField("1.2");
-        GUITools.fixTextFieldSize(firstEqFreeTermInput);
-        firstEqFreeTermInput.setCaretPosition(0);
+        wallThicknessInput = new JTextField("0.3");
+        GUITools.fixTextFieldSize(wallThicknessInput);
+        wallThicknessInput.setCaretPosition(0);
 
-        firstEqXStartValueInput = new JTextField("0.0");
-        GUITools.fixTextFieldSize(firstEqXStartValueInput);
-        firstEqXStartValueInput.setCaretPosition(0);
+        thermalConductivityInput = new JTextField("237");
+        GUITools.fixTextFieldSize(thermalConductivityInput);
+        thermalConductivityInput.setCaretPosition(0);
 
-        secondEqXEndValueInput = new JTextField("1.0");
-        GUITools.fixTextFieldSize(secondEqXEndValueInput);
-        secondEqXEndValueInput.setCaretPosition(0);
+        thermalDiffusivityInput = new JTextField("0.00008418");
+        GUITools.fixTextFieldSize(thermalDiffusivityInput);
+        thermalDiffusivityInput.setCaretPosition(0);
 
-        secondEqXCoeffInput = new JTextField("-2.705882353");
-        GUITools.fixTextFieldSize(secondEqXCoeffInput);
-        secondEqXCoeffInput.setCaretPosition(0);
+        xStepInput = new JTextField("0.001");
+        GUITools.fixTextFieldSize(xStepInput);
+        xStepInput.setCaretPosition(0);
 
-        secondEqFreeTermInput = new JTextField("3.905882353");
-        GUITools.fixTextFieldSize(secondEqFreeTermInput);
-        secondEqFreeTermInput.setCaretPosition(0);
+        heatIrradiationCoeefInput = new JTextField("10");
+        GUITools.fixTextFieldSize(heatIrradiationCoeefInput);
+        heatIrradiationCoeefInput.setCaretPosition(0);
 
-        secondEqXStartValueInput = new JTextField("0.16");
-        GUITools.fixTextFieldSize(secondEqXStartValueInput);
-        secondEqXStartValueInput.setCaretPosition(0);
-
-        x0ValueInput = new JTextField("1.2");
-        GUITools.fixTextFieldSize(x0ValueInput);
-        x0ValueInput.setCaretPosition(0);
-
-        xiValueInput = new JTextField("3.5");
-        GUITools.fixTextFieldSize(xiValueInput);
-        xiValueInput.setCaretPosition(0);
-
-        timeStepInput = new JTextField("0.0005");
+        timeStepInput = new JTextField("7200");
         GUITools.fixTextFieldSize(timeStepInput);
         timeStepInput.setCaretPosition(0);
 
-        endTimeInput = new JTextField("0.08");
+        endTimeInput = new JTextField("172800");
         GUITools.fixTextFieldSize(endTimeInput);
         endTimeInput.setCaretPosition(0);
 
@@ -142,45 +124,21 @@ public class MainWindow {
             @Override
             public void actionPerformed(ActionEvent ae) {
                 log.debug("Process btn pressed");
-                Map<BigDecimal, Double> xStartTemp = new HashMap<BigDecimal, Double>();
-                final int xValuesScale = 2;
+                double envTemp = Double.parseDouble(envTempInput.getText());
+                double wallThickness = Double.parseDouble(wallThicknessInput.getText());
+                double thermalConductivity = Double.parseDouble(thermalConductivityInput.getText());
+                double thermalDiffusivity = Double.parseDouble(thermalDiffusivityInput.getText());
+                double startTemp = Double.parseDouble(startTempInput.getText());
+                double xStep = Double.parseDouble(xStepInput.getText());
 
-                /*double xCoeff = -2.705882353d;
-                double freeTerm = 3.905882353d;
-                double startX = 0.16d;
-                double endX = 1d;*/
-                double xCoeff = Double.parseDouble(firstEqXCoeffInput.getText());
-                double freeTerm = Double.parseDouble(firstEqFreeTermInput.getText());
-                double startX = Double.parseDouble(firstEqXStartValueInput.getText());
-                double endX = Double.parseDouble(firstEqXEndValueInput.getText());
-                final double xStep = 0.001d;
-                for (double currX = startX; currX <= endX; currX = currX + xStep) {
-                    BigDecimal temp = new BigDecimal(currX);
-                    xStartTemp.put(temp.setScale(xValuesScale, RoundingMode.HALF_UP), (xCoeff * currX) + freeTerm);
-                }
+                double heatIrradiationCoeff = Double.parseDouble(heatIrradiationCoeefInput.getText());
 
-                /*xCoeff = 0.066666667d;
-                freeTerm = 1.2d;
-                startX = 0d;
-                endX = 0.15d;*/
-                xCoeff = Double.parseDouble(secondEqXCoeffInput.getText());
-                freeTerm = Double.parseDouble(secondEqFreeTermInput.getText());
-                startX = Double.parseDouble(secondEqXStartValueInput.getText());
-                endX = Double.parseDouble(secondEqXEndValueInput.getText());
-                for (double currX = startX; currX <= endX; currX = currX + xStep) {
-                    BigDecimal temp = new BigDecimal(currX);
-                    xStartTemp.put(temp.setScale(xValuesScale, RoundingMode.HALF_UP), (xCoeff * currX) + freeTerm);
-                }
-
-                double x0 = Double.parseDouble(x0ValueInput.getText());
-                double xi = Double.parseDouble(xiValueInput.getText());
-
-                log.debug("Start data forming finished");
                 final double timeStep = Double.parseDouble(timeStepInput.getText());
                 final double endTime = Double.parseDouble(endTimeInput.getText());
 
                 ImplicitFiniteDifferenceMethod implicitFiniteDifferenceMethod =
-                        new ImplicitFiniteDifferenceMethod(1000, 0, 0.3, 10, 0.001, 0.00008418, 237, 7200, 172800);
+                        new ImplicitFiniteDifferenceMethod(startTemp, envTemp, wallThickness, heatIrradiationCoeff,
+                                xStep, thermalDiffusivity, thermalConductivity, timeStep, endTime);
                 Map<Double, Map<BigDecimal, Double>> calculatedTemp = implicitFiniteDifferenceMethod.calculate();
 
                 JFileChooser fileChooser = new JFileChooser() {
@@ -251,101 +209,62 @@ public class MainWindow {
         JPanel inputsPanel = BoxLayoutUtils.createVerticalPanel();
 
         JPanel tempHorPanel = BoxLayoutUtils.createHorizontalPanel();
-        JLabel firstEquationLabel = new JLabel(FIRST_EQUATION_LABEL_TEXT);
-        tempHorPanel.add(firstEquationLabel);
-        inputsPanel.add(tempHorPanel);
-        inputsPanel.add(Box.createRigidArea(StandardDimension.VER_HALF_RIGID_AREA.getValue()));
-
-        tempHorPanel = BoxLayoutUtils.createHorizontalPanel();
-        JLabel firstEqXStartValueLabel = new JLabel(X_START_VALUE_LABEL_TEXT);
-        tempHorPanel.add(firstEqXStartValueLabel);
+        JLabel startTempLabel = new JLabel(START_TEMP_LABEL_TEXT);
+        tempHorPanel.add(startTempLabel);
         tempHorPanel.add(Box.createRigidArea(StandardDimension.HOR_HALF_RIGID_AREA.getValue()));
-        tempHorPanel.add(firstEqXStartValueInput);
+        tempHorPanel.add(startTempInput);
         inputsPanel.add(tempHorPanel);
         inputsPanel.add(Box.createRigidArea(StandardDimension.VER_RIGID_AREA.getValue()));
 
         tempHorPanel = BoxLayoutUtils.createHorizontalPanel();
-        JLabel firstEqXEndValueLabel = new JLabel(X_END_VALUE_LABEL_TEXT);
-        tempHorPanel.add(firstEqXEndValueLabel);
+        JLabel environmentTempLabel = new JLabel(ENV_TEMP_LABEL_TEXT);
+        tempHorPanel.add(environmentTempLabel);
         tempHorPanel.add(Box.createRigidArea(StandardDimension.HOR_HALF_RIGID_AREA.getValue()));
-        tempHorPanel.add(firstEqXEndValueInput);
+        tempHorPanel.add(envTempInput);
         inputsPanel.add(tempHorPanel);
         inputsPanel.add(Box.createRigidArea(StandardDimension.VER_RIGID_AREA.getValue()));
 
         tempHorPanel = BoxLayoutUtils.createHorizontalPanel();
-        JLabel firstEqXCoeffLabel = new JLabel(X_COEFF_LABEL_TEXT);
-        tempHorPanel.add(firstEqXCoeffLabel);
+        JLabel wallThicknessLabel = new JLabel(WALL_THICKNESS_LABEL_TEXT);
+        tempHorPanel.add(wallThicknessLabel);
         tempHorPanel.add(Box.createRigidArea(StandardDimension.HOR_HALF_RIGID_AREA.getValue()));
-        tempHorPanel.add(firstEqXCoeffInput);
-        inputsPanel.add(tempHorPanel);
-        inputsPanel.add(Box.createRigidArea(StandardDimension.VER_HALF_RIGID_AREA.getValue()));
-
-        tempHorPanel = BoxLayoutUtils.createHorizontalPanel();
-        JLabel firstEqFreeTermLabel = new JLabel(FREE_TERM_LABEL_TEXT);
-        tempHorPanel.add(firstEqFreeTermLabel);
-        tempHorPanel.add(Box.createRigidArea(StandardDimension.HOR_HALF_RIGID_AREA.getValue()));
-        tempHorPanel.add(firstEqFreeTermInput);
-        inputsPanel.add(tempHorPanel);
-        inputsPanel.add(Box.createRigidArea(StandardDimension.VER_RIGID_AREA.getValue()));
-
-        inputsPanel.add(Box.createRigidArea(StandardDimension.VER_RIGID_AREA.getValue()));
-
-        tempHorPanel = BoxLayoutUtils.createHorizontalPanel();
-        JLabel secondEquationLabel = new JLabel(SECOND_EQUATION_LABEL_TEXT);
-        tempHorPanel.add(secondEquationLabel);
-        inputsPanel.add(tempHorPanel);
-        inputsPanel.add(Box.createRigidArea(StandardDimension.VER_HALF_RIGID_AREA.getValue()));
-
-        tempHorPanel = BoxLayoutUtils.createHorizontalPanel();
-        JLabel secondEqXStartValueLabel = new JLabel(X_START_VALUE_LABEL_TEXT);
-        tempHorPanel.add(secondEqXStartValueLabel);
-        tempHorPanel.add(Box.createRigidArea(StandardDimension.HOR_HALF_RIGID_AREA.getValue()));
-        tempHorPanel.add(secondEqXStartValueInput);
+        tempHorPanel.add(wallThicknessInput);
         inputsPanel.add(tempHorPanel);
         inputsPanel.add(Box.createRigidArea(StandardDimension.VER_RIGID_AREA.getValue()));
 
         tempHorPanel = BoxLayoutUtils.createHorizontalPanel();
-        JLabel secondEqXEndValueLabel = new JLabel(X_END_VALUE_LABEL_TEXT);
-        tempHorPanel.add(secondEqXEndValueLabel);
+        JLabel heatIrradiationCoeffLabel = new JLabel(HEAT_IRRADIATION_COEFF_LABEL_TEXT);
+        tempHorPanel.add(heatIrradiationCoeffLabel);
         tempHorPanel.add(Box.createRigidArea(StandardDimension.HOR_HALF_RIGID_AREA.getValue()));
-        tempHorPanel.add(secondEqXEndValueInput);
+        tempHorPanel.add(heatIrradiationCoeefInput);
         inputsPanel.add(tempHorPanel);
         inputsPanel.add(Box.createRigidArea(StandardDimension.VER_RIGID_AREA.getValue()));
 
         tempHorPanel = BoxLayoutUtils.createHorizontalPanel();
-        JLabel secondEqXCoeffLabel = new JLabel(X_COEFF_LABEL_TEXT);
-        tempHorPanel.add(secondEqXCoeffLabel);
+        JLabel thermalConductivityLabel = new JLabel(THERMAL_CONDUCTIVITY_LABEL_TEXT);
+        tempHorPanel.add(thermalConductivityLabel);
         tempHorPanel.add(Box.createRigidArea(StandardDimension.HOR_HALF_RIGID_AREA.getValue()));
-        tempHorPanel.add(secondEqXCoeffInput);
+        tempHorPanel.add(thermalConductivityInput);
         inputsPanel.add(tempHorPanel);
-        inputsPanel.add(Box.createRigidArea(StandardDimension.VER_HALF_RIGID_AREA.getValue()));
+        inputsPanel.add(Box.createRigidArea(StandardDimension.VER_RIGID_AREA.getValue()));
 
         tempHorPanel = BoxLayoutUtils.createHorizontalPanel();
-        JLabel secondEqFreeTermLabel = new JLabel(FREE_TERM_LABEL_TEXT);
-        tempHorPanel.add(secondEqFreeTermLabel);
+        JLabel thermalDiffusivityLabel = new JLabel(THERMAL_DIFFUSIVITY_LABEL_TEXT);
+        tempHorPanel.add(thermalDiffusivityLabel);
         tempHorPanel.add(Box.createRigidArea(StandardDimension.HOR_HALF_RIGID_AREA.getValue()));
-        tempHorPanel.add(secondEqFreeTermInput);
+        tempHorPanel.add(thermalDiffusivityInput);
         inputsPanel.add(tempHorPanel);
+        inputsPanel.add(Box.createRigidArea(StandardDimension.VER_RIGID_AREA.getValue()));
 
         inputsPanel.add(Box.createRigidArea(StandardDimension.VER_RIGID_AREA.getValue()));
         inputsPanel.add(Box.createRigidArea(StandardDimension.VER_RIGID_AREA.getValue()));
 
         tempHorPanel = BoxLayoutUtils.createHorizontalPanel();
-        JLabel x0ValueLabel = new JLabel(X_0_VALUE_LABEL_TEXT);
-        tempHorPanel.add(x0ValueLabel);
+        JLabel xStepLabel = new JLabel(X_STEP_LABEL_TEXT);
+        tempHorPanel.add(xStepLabel);
         tempHorPanel.add(Box.createRigidArea(StandardDimension.HOR_HALF_RIGID_AREA.getValue()));
-        tempHorPanel.add(x0ValueInput);
+        tempHorPanel.add(xStepInput);
         inputsPanel.add(tempHorPanel);
-        inputsPanel.add(Box.createRigidArea(StandardDimension.VER_HALF_RIGID_AREA.getValue()));
-
-        tempHorPanel = BoxLayoutUtils.createHorizontalPanel();
-        JLabel xiValueLabel = new JLabel(X_I_VALUE_LABEL_TEXT);
-        tempHorPanel.add(xiValueLabel);
-        tempHorPanel.add(Box.createRigidArea(StandardDimension.HOR_HALF_RIGID_AREA.getValue()));
-        tempHorPanel.add(xiValueInput);
-        inputsPanel.add(tempHorPanel);
-
-        inputsPanel.add(Box.createRigidArea(StandardDimension.VER_RIGID_AREA.getValue()));
         inputsPanel.add(Box.createRigidArea(StandardDimension.VER_RIGID_AREA.getValue()));
 
         tempHorPanel = BoxLayoutUtils.createHorizontalPanel();
@@ -354,7 +273,7 @@ public class MainWindow {
         tempHorPanel.add(Box.createRigidArea(StandardDimension.HOR_HALF_RIGID_AREA.getValue()));
         tempHorPanel.add(timeStepInput);
         inputsPanel.add(tempHorPanel);
-        inputsPanel.add(Box.createRigidArea(StandardDimension.VER_HALF_RIGID_AREA.getValue()));
+        inputsPanel.add(Box.createRigidArea(StandardDimension.VER_RIGID_AREA.getValue()));
 
         tempHorPanel = BoxLayoutUtils.createHorizontalPanel();
         JLabel endTimeLabel = new JLabel(END_TIME_LABEL_TEXT);
@@ -363,9 +282,9 @@ public class MainWindow {
         tempHorPanel.add(endTimeInput);
         inputsPanel.add(tempHorPanel);
 
-        GUITools.makeSameSize(firstEqXEndValueLabel, firstEqXCoeffLabel, firstEqFreeTermLabel, firstEqXStartValueLabel,
-                secondEqFreeTermLabel, secondEqXCoeffLabel, secondEqXEndValueLabel, secondEqXStartValueLabel,
-                x0ValueLabel, xiValueLabel, timeStepLabel, endTimeLabel);
+        GUITools.makeSameSize(environmentTempLabel, wallThicknessLabel, startTempLabel, xStepLabel,
+                thermalDiffusivityLabel, thermalConductivityLabel, heatIrradiationCoeffLabel, timeStepLabel,
+                endTimeLabel);
 
         return inputsPanel;
     }
