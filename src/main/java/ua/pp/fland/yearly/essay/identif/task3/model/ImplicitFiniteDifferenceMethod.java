@@ -34,27 +34,29 @@ public class ImplicitFiniteDifferenceMethod {
 
     private final static int X_STEP_SCALE = 4;
 
-    private final static double lambda = 1;
+    private final double lambda;
 
-    private final double Bi;
+    private final double a;
 
     private final long n;
 
-    private final double DOUBLE_DELTA = 0.0001;
+    private final static double DOUBLE_DELTA = 0.0001;
 
     public ImplicitFiniteDifferenceMethod(double startTemp, double environmentTemp, double wallThickness,
-                                          double heatIrradiationCoeff, double xStep) {
+                                          double heatIrradiationCoeff, double xStep, double a, double lambda,
+                                          double timeStep, double endTime) {
         this.startTemp = startTemp;
         this.environmentTemp = environmentTemp;
         this.wallThickness = wallThickness;
         this.heatIrradiationCoeff = heatIrradiationCoeff;
 
         this.xStep = xStep;
+        this.a = a;
+        this.lambda = lambda;
 
-        timeStep = 0.005;
-        endTime = 0.5;
+        this.timeStep = timeStep;
+        this.endTime = endTime;
 
-        Bi = wallThickness * heatIrradiationCoeff / lambda;
         n = Math.round(wallThickness / xStep);
     }
 
@@ -65,7 +67,7 @@ public class ImplicitFiniteDifferenceMethod {
         calculatedTemp.put(currTime, calculatedXTemp);
         currTime = currTime + timeStep;
 
-        final double s = (xStep * xStep) / timeStep;
+        final double s = (xStep * xStep) / (timeStep * a);
 
         for (; currTime < endTime; currTime = currTime + timeStep) {
             calculatedXTemp = new HashMap<BigDecimal, Double>(getNextTimeTemp(calculatedXTemp, s));
@@ -83,7 +85,9 @@ public class ImplicitFiniteDifferenceMethod {
         double b = -1;
         double d = 0;
         double c = 0;
-        directFlowDataMap.put(0L, new DirectFlowData(c, b, d, -a / b, -d / b));
+        double f = -a / b;
+        double g = -d / b;
+        directFlowDataMap.put(0L, new DirectFlowData(c, b, d, f, g));
 
         double currX = 0.0 + xStep;
         long i;
@@ -96,8 +100,8 @@ public class ImplicitFiniteDifferenceMethod {
             double prevF = directFlowDataMap.get(i - 1).getF();
             double prevG = directFlowDataMap.get(i - 1).getG();
 
-            double f = -a / (c * prevF + b);
-            double g = -(d + c * prevG) / (c * prevF + b);
+            f = -a / (c * prevF + b);
+            g = -(d + c * prevG) / (c * prevF + b);
             directFlowDataMap.put(i, new DirectFlowData(c, b, d, f, g));
             currX = currX + xStep;
         }
@@ -105,11 +109,11 @@ public class ImplicitFiniteDifferenceMethod {
         b = 1 + (heatIrradiationCoeff * xStep) / lambda;
         a = 0;
         c = -1;
-        d = environmentTemp * heatIrradiationCoeff * xStep / lambda;
+        d = -environmentTemp * heatIrradiationCoeff * xStep / lambda;
         double prevF = directFlowDataMap.get(i - 1).getF();
         double prevG = directFlowDataMap.get(i - 1).getG();
-        double f = -a / (c * prevF + b);
-        double g = -(d + c * prevG) / (c * prevF + b);
+        f = -a / (c * prevF + b);
+        g = -(d + c * prevG) / (c * prevF + b);
         directFlowDataMap.put(i, new DirectFlowData(c, b, d, f, g));
 
         currX = wallThickness;
