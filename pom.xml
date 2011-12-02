@@ -6,7 +6,7 @@
 
     <groupId>identif_yearly_essay</groupId>
     <artifactId>task_3</artifactId>
-    <version>1.0.0b</version>
+    <version>1.0.1rc</version>
 
     <properties>
         <java-version>1.6</java-version>
@@ -100,7 +100,7 @@
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
-                            <finalName>${artifactId}-full-${version}</finalName>
+                            <finalName>${groupId}-${artifactId}-full-${version}</finalName>
                         </configuration>
                     </execution>
                 </executions>

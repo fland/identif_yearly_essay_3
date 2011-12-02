@@ -40,7 +40,7 @@ public class ImplicitFiniteDifferenceMethod {
 
     private final long n;
 
-    private final static double DOUBLE_DELTA = 0.0001;
+    private final static double DOUBLE_DELTA = 0.00001;
 
     public ImplicitFiniteDifferenceMethod(double startTemp, double environmentTemp, double wallThickness,
                                           double heatIrradiationCoeff, double xStep, double a, double lambda,
@@ -61,6 +61,8 @@ public class ImplicitFiniteDifferenceMethod {
     }
 
     public Map<Double, Map<BigDecimal, Double>> calculate() {
+        log.debug("Calculating started...");
+
         Map<Double, Map<BigDecimal, Double>> calculatedTemp = new HashMap<Double, Map<BigDecimal, Double>>();
         Map<BigDecimal, Double> calculatedXTemp = new HashMap<BigDecimal, Double>(getStartTimeTemp(startTemp));
         double currTime = 0.0;
@@ -69,10 +71,12 @@ public class ImplicitFiniteDifferenceMethod {
 
         final double s = (xStep * xStep) / (timeStep * a);
 
-        for (; currTime < endTime; currTime = currTime + timeStep) {
+        for (; currTime <= endTime; currTime = currTime + timeStep) {
             calculatedXTemp = new HashMap<BigDecimal, Double>(getNextTimeTemp(calculatedXTemp, s));
             calculatedTemp.put(currTime, calculatedXTemp);
         }
+
+        log.debug("Calculating finished.");
 
         return calculatedTemp;
     }
@@ -126,7 +130,8 @@ public class ImplicitFiniteDifferenceMethod {
         double prevTemp = -(c * g + d) / (b + c * f);
         calculatedXTemp.put(currXBigDecimal, prevTemp);
         currX = currX - xStep;
-        for (; i > 0; i--) {
+        i = i - 1;
+        for (; i >= 0; i--) {
             currXBigDecimal = new BigDecimal(currX).setScale(X_STEP_SCALE, RoundingMode.HALF_UP);
             f = directFlowDataMap.get(i).getF();
             g = directFlowDataMap.get(i).getG();

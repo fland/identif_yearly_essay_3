@@ -83,7 +83,7 @@ public class MainWindow {
         GUITools.fixTextFieldSize(thermalConductivityInput);
         thermalConductivityInput.setCaretPosition(0);
 
-        thermalDiffusivityInput = new JTextField("0.00008418");
+        thermalDiffusivityInput = new JTextField("0.000084089");
         GUITools.fixTextFieldSize(thermalDiffusivityInput);
         thermalDiffusivityInput.setCaretPosition(0);
 
@@ -95,11 +95,11 @@ public class MainWindow {
         GUITools.fixTextFieldSize(heatIrradiationCoeefInput);
         heatIrradiationCoeefInput.setCaretPosition(0);
 
-        timeStepInput = new JTextField("7200");
+        timeStepInput = new JTextField("3600");
         GUITools.fixTextFieldSize(timeStepInput);
         timeStepInput.setCaretPosition(0);
 
-        endTimeInput = new JTextField("172800");
+        endTimeInput = new JTextField("345600");
         GUITools.fixTextFieldSize(endTimeInput);
         endTimeInput.setCaretPosition(0);
 
