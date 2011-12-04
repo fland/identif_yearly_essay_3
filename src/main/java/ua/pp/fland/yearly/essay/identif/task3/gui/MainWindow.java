@@ -6,6 +6,7 @@ import ua.pp.fland.yearly.essay.identif.task3.gui.tools.BoxLayoutUtils;
 import ua.pp.fland.yearly.essay.identif.task3.gui.tools.ComponentUtils;
 import ua.pp.fland.yearly.essay.identif.task3.gui.tools.GUITools;
 import ua.pp.fland.yearly.essay.identif.task3.gui.tools.StandardBordersSizes;
+import ua.pp.fland.yearly.essay.identif.task3.model.FiniteDifferenceMethod;
 import ua.pp.fland.yearly.essay.identif.task3.model.ImplicitFiniteDifferenceMethod;
 import ua.pp.fland.yearly.essay.identif.task3.model.storage.CsvTimeTemperatureStorer;
 import ua.pp.fland.yearly.essay.identif.task3.model.storage.TimeTemperatureStorer;
@@ -136,7 +137,7 @@ public class MainWindow {
                 final double timeStep = Double.parseDouble(timeStepInput.getText());
                 final double endTime = Double.parseDouble(endTimeInput.getText());
 
-                ImplicitFiniteDifferenceMethod implicitFiniteDifferenceMethod =
+                FiniteDifferenceMethod implicitFiniteDifferenceMethod =
                         new ImplicitFiniteDifferenceMethod(startTemp, envTemp, wallThickness, heatIrradiationCoeff,
                                 xStep, thermalDiffusivity, thermalConductivity, timeStep, endTime);
                 Map<Double, Map<BigDecimal, Double>> calculatedTemp = implicitFiniteDifferenceMethod.calculate();

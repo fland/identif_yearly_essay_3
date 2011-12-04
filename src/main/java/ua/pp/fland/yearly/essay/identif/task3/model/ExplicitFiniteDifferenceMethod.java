@@ -11,10 +11,10 @@ import java.util.Map;
 
 /**
  * @author Maxim Bondarenko
- * @version 1.0 11/24/11
+ * @version 1.0 12/4/11
  */
 
-public class ImplicitFiniteDifferenceMethod extends FiniteDifferenceMethod{
+public class ExplicitFiniteDifferenceMethod extends FiniteDifferenceMethod{
 
     private static final Logger log = LoggerFactory.getLogger(ImplicitFiniteDifferenceMethod.class);
 
@@ -38,7 +38,7 @@ public class ImplicitFiniteDifferenceMethod extends FiniteDifferenceMethod{
 
     private final long n;
 
-    public ImplicitFiniteDifferenceMethod(double startTemp, double environmentTemp, double wallThickness,
+    public ExplicitFiniteDifferenceMethod(double startTemp, double environmentTemp, double wallThickness,
                                           double heatIrradiationCoeff, double xStep, double a, double lambda,
                                           double timeStep, double endTime) {
         this.startTemp = startTemp;
@@ -57,7 +57,7 @@ public class ImplicitFiniteDifferenceMethod extends FiniteDifferenceMethod{
     }
 
     @Override
-    public Map<Double, Map<BigDecimal, Double>> calculate() {
+    public Map<Double, Map<BigDecimal, Double>> calculate(){
         log.debug("Calculating started...");
 
         Map<Double, Map<BigDecimal, Double>> calculatedTemp = new HashMap<Double, Map<BigDecimal, Double>>();
