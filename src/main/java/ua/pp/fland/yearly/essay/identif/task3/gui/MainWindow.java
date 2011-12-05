@@ -6,6 +6,7 @@ import ua.pp.fland.yearly.essay.identif.task3.gui.tools.BoxLayoutUtils;
 import ua.pp.fland.yearly.essay.identif.task3.gui.tools.ComponentUtils;
 import ua.pp.fland.yearly.essay.identif.task3.gui.tools.GUITools;
 import ua.pp.fland.yearly.essay.identif.task3.gui.tools.StandardBordersSizes;
+import ua.pp.fland.yearly.essay.identif.task3.model.ExplicitFiniteDifferenceMethod;
 import ua.pp.fland.yearly.essay.identif.task3.model.FiniteDifferenceMethod;
 import ua.pp.fland.yearly.essay.identif.task3.model.ImplicitFiniteDifferenceMethod;
 import ua.pp.fland.yearly.essay.identif.task3.model.storage.CsvTimeTemperatureStorer;
@@ -36,7 +37,8 @@ public class MainWindow {
     private final static Dimension MAIN_FRAME_SIZE = new Dimension(Integer.parseInt(bundle.getString("window.width")),
             Integer.parseInt(bundle.getString("window.height")));
 
-    private final static String PROCESS_BTN_TEXT = "Process";
+    private final static String PROCESS_IMPLICIT_BTN_TEXT = "Process Implicit";
+    private final static String PROCESS_EXPLICIT_BTN_TEXT = "Process Explicit";
     private final static String EXIT_BTN_TEXT = "Exit";
 
     private final static String START_TEMP_LABEL_TEXT = "Start temperature, C: ";
@@ -120,11 +122,11 @@ public class MainWindow {
     private JPanel createButtonsPanel(final JFrame mainFrame) {
         JPanel buttonsPanel = BoxLayoutUtils.createHorizontalPanel();
 
-        JButton processButton = new JButton(PROCESS_BTN_TEXT);
-        processButton.addActionListener(new ActionListener() {
+        JButton processImplicitButton = new JButton(PROCESS_IMPLICIT_BTN_TEXT);
+        processImplicitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                log.debug("Process btn pressed");
+                log.debug("Process implicit btn pressed");
                 double envTemp = Double.parseDouble(envTempInput.getText());
                 double wallThickness = Double.parseDouble(wallThicknessInput.getText());
                 double thermalConductivity = Double.parseDouble(thermalConductivityInput.getText());
@@ -186,6 +188,72 @@ public class MainWindow {
             }
         });
 
+        JButton processExplicitButton = new JButton(PROCESS_EXPLICIT_BTN_TEXT);
+        processExplicitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                log.debug("Process explicit btn pressed");
+                double envTemp = Double.parseDouble(envTempInput.getText());
+                double wallThickness = Double.parseDouble(wallThicknessInput.getText());
+                double thermalConductivity = Double.parseDouble(thermalConductivityInput.getText());
+                double thermalDiffusivity = Double.parseDouble(thermalDiffusivityInput.getText());
+                double startTemp = Double.parseDouble(startTempInput.getText());
+                double xStep = Double.parseDouble(xStepInput.getText());
+
+                double heatIrradiationCoeff = Double.parseDouble(heatIrradiationCoeefInput.getText());
+
+                final double timeStep = Double.parseDouble(timeStepInput.getText());
+                final double endTime = Double.parseDouble(endTimeInput.getText());
+
+                FiniteDifferenceMethod explicitFiniteDifferenceMethod =
+                        new ExplicitFiniteDifferenceMethod(startTemp, envTemp, wallThickness, heatIrradiationCoeff,
+                                xStep, thermalDiffusivity, thermalConductivity, timeStep, endTime);
+                Map<Double, Map<BigDecimal, Double>> calculatedTemp = explicitFiniteDifferenceMethod.calculate();
+
+                JFileChooser fileChooser = new JFileChooser() {
+                    @Override
+                    public void approveSelection() {
+                        File selectedFile = getSelectedFile();
+                        if (selectedFile.exists() && getDialogType() == SAVE_DIALOG) {
+                            int result = JOptionPane.showConfirmDialog(this, "File " + selectedFile.getName() +
+                                    " exist. Overwrite it?", "Overwrite file dialog", JOptionPane.YES_NO_CANCEL_OPTION);
+                            switch (result) {
+                                case JOptionPane.YES_OPTION:
+                                    super.approveSelection();
+                                    return;
+                                case JOptionPane.NO_OPTION:
+                                    return;
+                                case JOptionPane.CANCEL_OPTION:
+                                    super.cancelSelection();
+                                    return;
+                            }
+                        }
+                        super.approveSelection();
+                    }
+                };
+                fileChooser.setFileFilter(new FileNameExtensionFilter("CSV files (*.csv)", "csv"));
+                int result = fileChooser.showSaveDialog(mainFrame);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    String path = fileChooser.getSelectedFile().getAbsolutePath();
+                    if (!path.toLowerCase().endsWith(".csv")) {
+                        path = path + ".csv";
+                    }
+                    log.debug("Storing data to: " + path);
+                    try {
+                        TimeTemperatureStorer timeTemperatureStorer = new CsvTimeTemperatureStorer(path);
+                        timeTemperatureStorer.store(calculatedTemp);
+                    } catch (IOException e) {
+                        log.error("Exception: " + e, e);
+                        JOptionPane.showMessageDialog(mainFrame, "Error while storing " + e,
+                                "IO Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    log.debug("Data stored.");
+                    JOptionPane.showMessageDialog(mainFrame, "Temperature calculated and stored to " + path, "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+
         JButton exitButton = new JButton(EXIT_BTN_TEXT);
         exitButton.addActionListener(new ActionListener() {
             @Override
@@ -195,11 +263,12 @@ public class MainWindow {
             }
         });
 
-        GUITools.createRecommendedMargin(processButton, exitButton);
-        GUITools.makeSameSize(processButton, exitButton);
+        GUITools.createRecommendedMargin(processImplicitButton, processExplicitButton, exitButton);
+        GUITools.makeSameSize(processImplicitButton, processExplicitButton, exitButton);
 
-        buttonsPanel.add(processButton);
+        buttonsPanel.add(processImplicitButton);
         buttonsPanel.add(Box.createRigidArea(StandardDimension.HOR_RIGID_AREA.getValue()));
+        buttonsPanel.add(processExplicitButton);
         buttonsPanel.add(Box.createRigidArea(StandardDimension.HOR_RIGID_AREA.getValue()));
         buttonsPanel.add(exitButton);
 

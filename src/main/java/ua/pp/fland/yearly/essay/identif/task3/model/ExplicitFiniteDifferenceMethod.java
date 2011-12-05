@@ -14,7 +14,7 @@ import java.util.Map;
  * @version 1.0 12/4/11
  */
 
-public class ExplicitFiniteDifferenceMethod extends FiniteDifferenceMethod{
+public class ExplicitFiniteDifferenceMethod extends FiniteDifferenceMethod {
 
     private static final Logger log = LoggerFactory.getLogger(ImplicitFiniteDifferenceMethod.class);
 
@@ -57,7 +57,7 @@ public class ExplicitFiniteDifferenceMethod extends FiniteDifferenceMethod{
     }
 
     @Override
-    public Map<Double, Map<BigDecimal, Double>> calculate(){
+    public Map<Double, Map<BigDecimal, Double>> calculate() {
         log.debug("Calculating started...");
 
         Map<Double, Map<BigDecimal, Double>> calculatedTemp = new HashMap<Double, Map<BigDecimal, Double>>();
@@ -66,10 +66,8 @@ public class ExplicitFiniteDifferenceMethod extends FiniteDifferenceMethod{
         calculatedTemp.put(currTime, calculatedXTemp);
         currTime = currTime + timeStep;
 
-        final double s = (xStep * xStep) / (timeStep * a);
-
         for (; currTime <= endTime; currTime = currTime + timeStep) {
-            calculatedXTemp = new HashMap<BigDecimal, Double>(getNextTimeTemp(calculatedXTemp, s));
+            calculatedXTemp = new HashMap<BigDecimal, Double>(getNextTimeTemp(calculatedXTemp));
             calculatedTemp.put(currTime, calculatedXTemp);
         }
 
@@ -78,65 +76,41 @@ public class ExplicitFiniteDifferenceMethod extends FiniteDifferenceMethod{
         return calculatedTemp;
     }
 
-    private Map<BigDecimal, Double> getNextTimeTemp(Map<BigDecimal, Double> prevTimeTemp, final double s) {
+    private Map<BigDecimal, Double> getNextTimeTemp(Map<BigDecimal, Double> prevTimeTemp) {
         Map<BigDecimal, Double> calculatedXTemp = new HashMap<BigDecimal, Double>();
-
-        Map<Long, DirectFlowData> directFlowDataMap = new HashMap<Long, DirectFlowData>();
-        double a = 1;
-        double b = -1;
-        double d = 0;
-        double c = 0;
-        double f = -a / b;
-        double g = -d / b;
-        directFlowDataMap.put(0L, new DirectFlowData(c, b, d, f, g));
 
         double currX = 0.0 + xStep;
         long i;
         for (i = 1; i < n; i++) {
             BigDecimal currXBigDecimal = new BigDecimal(currX).setScale(X_STEP_SCALE, RoundingMode.HALF_UP);
-            c = 1;
-            a = 1;
-            b = -(2 + s);
-            d = s * prevTimeTemp.get(currXBigDecimal);
-            double prevF = directFlowDataMap.get(i - 1).getF();
-            double prevG = directFlowDataMap.get(i - 1).getG();
+            BigDecimal prevXBigDecimal = new BigDecimal(currX - xStep).setScale(X_STEP_SCALE, RoundingMode.HALF_UP);
+            BigDecimal nextXBigDecimal = new BigDecimal(currX + xStep).setScale(X_STEP_SCALE, RoundingMode.HALF_UP);
 
-            f = -a / (c * prevF + b);
-            g = -(d + c * prevG) / (c * prevF + b);
-            directFlowDataMap.put(i, new DirectFlowData(c, b, d, f, g));
+            double temperature = prevTimeTemp.get(prevXBigDecimal) * this.a * timeStep / (xStep * xStep) +
+                    prevTimeTemp.get(currXBigDecimal) * (1 - 2 * this.a * timeStep / (xStep * xStep)) +
+                    prevTimeTemp.get(nextXBigDecimal) * timeStep *this.a / (xStep * xStep);
+
+            calculatedXTemp.put(currXBigDecimal, temperature);
             currX = currX + xStep;
         }
-//        i = i + 1;
-        b = 1 + (heatIrradiationCoeff * xStep) / lambda;
-        a = 0;
-        c = -1;
-        d = -environmentTemp * heatIrradiationCoeff * xStep / lambda;
-        double prevF = directFlowDataMap.get(i - 1).getF();
-        double prevG = directFlowDataMap.get(i - 1).getG();
-        f = -a / (c * prevF + b);
-        g = -(d + c * prevG) / (c * prevF + b);
-        directFlowDataMap.put(i, new DirectFlowData(c, b, d, f, g));
+
+        currX = 0.0;
+        BigDecimal currXBigDecimal = new BigDecimal(currX).setScale(X_STEP_SCALE, RoundingMode.HALF_UP);
+        BigDecimal nextXBigDecimal = new BigDecimal(currX + xStep).setScale(X_STEP_SCALE, RoundingMode.HALF_UP);
+        double a = 1;
+        double b = -1;
+        double d = 0;
+        double temperature = (d - a * calculatedXTemp.get(nextXBigDecimal)) / b;
+        calculatedXTemp.put(currXBigDecimal, temperature);
 
         currX = wallThickness;
-        BigDecimal currXBigDecimal = new BigDecimal(currX).setScale(X_STEP_SCALE, RoundingMode.HALF_UP);
-        c = directFlowDataMap.get(i).getC();
-        b = directFlowDataMap.get(i).getB();
-        d = directFlowDataMap.get(i).getD();
-        g = directFlowDataMap.get(i - 1).getG();
-        f = directFlowDataMap.get(i - 1).getF();
-        double prevTemp = -(c * g + d) / (b + c * f);
-        calculatedXTemp.put(currXBigDecimal, prevTemp);
-        currX = currX - xStep;
-        i = i - 1;
-        for (; i >= 0; i--) {
-            currXBigDecimal = new BigDecimal(currX).setScale(X_STEP_SCALE, RoundingMode.HALF_UP);
-            f = directFlowDataMap.get(i).getF();
-            g = directFlowDataMap.get(i).getG();
-            double currTemp = f * prevTemp + g;
-            calculatedXTemp.put(currXBigDecimal, currTemp);
-            prevTemp = currTemp;
-            currX = currX - xStep;
-        }
+        currXBigDecimal = new BigDecimal(currX).setScale(X_STEP_SCALE, RoundingMode.HALF_UP);
+        BigDecimal prevXBigDecimal = new BigDecimal(currX - xStep).setScale(X_STEP_SCALE, RoundingMode.HALF_UP);
+        double c = -1;
+        b = 1 + heatIrradiationCoeff * xStep / lambda;
+        d = environmentTemp * heatIrradiationCoeff * xStep / lambda;
+        temperature = (d - c * calculatedXTemp.get(prevXBigDecimal)) / b;
+        calculatedXTemp.put(currXBigDecimal, temperature);
 
         return calculatedXTemp;
     }
